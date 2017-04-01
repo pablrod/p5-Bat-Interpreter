@@ -17,7 +17,13 @@ Bat::Interpreter::Delegate::Executor::PartialDryRunner - Executor for executing 
 
 =head1 SYNOPSIS
 
+    use Bat::Interpreter;
+    use Bat::Interpreter::Delegate::Executor::System;
 
+    my $system_executor = Bat::Interpreter::Delegate::Executor::System->new;
+
+    my $interpreter = Bat::Interpreter->new(executor => $system_executor);
+    $interpreter->run('my.cmd');
      
 =head1 DESCRIPTION
 
@@ -29,11 +35,29 @@ This executor is as dumb and simple as it can, be cautious.
 
 =cut
 
+=head2 execute_command
+
+Execute general commands.
+
+This executor use perl system
+
+=cut
+
 sub execute_command {
     my $self = shift();
     my $command = shift();
     return system($command);
 }
+
+=head2 execute_for_command
+
+Execute commands for use in FOR expressions.
+This is usually used to capture output and
+implement some logic inside the bat/cmd file.
+
+This executor executes this commands via perl subshell: ``
+
+=cut
 
 sub execute_for_command {
     my $self = shift();

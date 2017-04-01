@@ -26,6 +26,12 @@ from local filesystem, Hadoop File System, MogileFS, ...
 
 =cut
 
+=head2 get_contents
+
+Returns the contents of the filename
+
+=cut
+
 requires 'get_contents';
 
 1;

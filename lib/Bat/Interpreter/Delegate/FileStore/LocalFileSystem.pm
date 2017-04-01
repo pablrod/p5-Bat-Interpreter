@@ -18,13 +18,26 @@ Bat::Interpreter::Delegate::FileStore::LocalFileSystem -
 
 =head1 SYNOPSIS
 
+    use Bat::Interpreter;
+    use Bat::Interpreter::Delegate::FileStore::LocalFileSystem;
+
+    my $local_filesystem = Bat::Interpreter::Delegate::FileStore::LocalFileSystem->new;
+
+    my $interpreter = Bat::Interpreter->new(batfilestore => $local_filesystem);
+    $interpreter->run('/var/cmd_storage/my.cmd'); 
 
      
 =head1 DESCRIPTION
 
-Accessing bat files via local file system
+Accessing bat/cmd files via local file system
 
 =head1 METHODS
+
+=cut
+
+=head2 get_contents
+
+Returns the contents of the filename
 
 =cut
 

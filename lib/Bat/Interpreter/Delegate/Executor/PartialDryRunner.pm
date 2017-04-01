@@ -17,7 +17,15 @@ Bat::Interpreter::Delegate::Executor::PartialDryRunner - Executor for executing 
 
 =head1 SYNOPSIS
 
+    use Bat::Interpreter;
+    use Bat::Interpreter::Delegate::Executor::PartialDryRunner;
 
+    my $partial_dry_runner = Bat::Interpreter::Delegate::Executor::PartialDryRunner->new;
+
+    my $interpreter = Bat::Interpreter->new(executor => $partial_dry_runner);
+    $interpreter->run('my.cmd');
+    
+    print Dumper($partial_dry_runner->commands_executed);
      
 =head1 DESCRIPTION
 
@@ -41,12 +49,30 @@ has 'commands_executed' => (
     }
 );
 
+=head2 execute_command
+
+Execute general commands.
+
+This executor just register the command in the attribute: commands_executed
+
+=cut
+
 sub execute_command {
     my $self = shift();
     my $command = shift();
     $self->add_command($command);
     return 0;
 }
+
+=head2 execute_for_command
+
+Execute commands for use in FOR expressions.
+This is usually used to capture output and
+implement some logic inside the bat/cmd file.
+
+This executor executes this commands via perl subshell: ``
+
+=cut
 
 sub execute_for_command {
     my $self = shift();
