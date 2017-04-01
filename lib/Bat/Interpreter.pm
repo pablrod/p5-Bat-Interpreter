@@ -5,6 +5,8 @@ use utf8;
 use Moose;
 use App::BatParser;
 use Carp;
+use Bat::Interpreter::Delegate::FileStore::LocalFileSystem;
+use Bat::Interpreter::Delegate::Executor::PartialDryRunner;
 use namespace::autoclean;
 
 # VERSION
@@ -29,6 +31,18 @@ Pure perl interpreter for a small subset of bat/cmd files.
 
 has 'batfilestore' => (
     is => 'rw',
+    does => 'Bat::Interpreter::Role::FileStore',
+    default => sub {
+        Bat::Interpreter::Delegate::FileStore::LocalFileSystem->new;
+    }
+);
+
+has 'executor' => (
+    is => 'rw',
+    does => 'Bat::Interpreter::Role::Executor',
+    default => sub {
+        Bat::Interpreter::Delegate::Executor::PartialDryRunner->new;
+    }
 );
 
 =head2 run
@@ -40,13 +54,13 @@ Run the interpreter
 sub run {
     my $self   = shift();
     my $filename     = shift();
-    my $external_env = shift();
-    $filename = $self->batfilestore->TraducirNombreArchivo($filename);
-    $filename = Path::Tiny::path($filename);
+    my $external_env = shift() // \%ENV;
+    #$filename = $self->batfilestore->TraducirNombreArchivo($filename);
+    #$filename = Path::Tiny::path($filename);
 
     my $parser = App::BatParser->new;
 
-    my $parse_tree = $parser->parse( $filename->slurp . "\r\n" );
+    my $parse_tree = $parser->parse( $self->batfilestore->get_contents($filename) . "\r\n" );
     if ($parse_tree) {
         my $lines = $parse_tree->{'File'}{'Lines'};
 
@@ -313,12 +327,7 @@ sub _adjust_path {
 
 sub _execute_command {
     my $self   = shift();
-    my $command = shift();
-    my $context = shift();
-    if ( !defined $context->{STDOUT} ) {
-        $context->{STDOUT} = [];
-    }
-    push @{ $context->{STDOUT} }, $command;
+    $self->executor->execute_command(@_);
 }
 
 sub _goto_label {
@@ -339,6 +348,8 @@ sub _goto_label {
 sub _for_command_evaluation {
     my $self   = shift();
     my $comando = shift();
+    return $self->executor->execute_for_command($comando);
+
     if ( $comando =~ /^horalocal\.pl(.*)/ ) {
         my $resultado_hora_local = HoraLocal($1);
         return $resultado_hora_local;
