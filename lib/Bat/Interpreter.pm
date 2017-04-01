@@ -321,7 +321,9 @@ sub _variable_substitution {
 sub _adjust_path {
     my $self   = shift();
     my $path = shift();
-    $path =~ s/\\/\//g;    # TODO make this OS dependant
+    if (!($^O =~ 'Win')) {
+        $path =~ s/\\/\//g;
+    }
     return $path;
 }
 
