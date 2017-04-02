@@ -19,7 +19,7 @@ Bat::Interpreter - Pure perl interpreter for a small subset of bat/cmd files
 
 =head1 SYNOPSIS
 
-## EXAMPLE: examples/basic.pl
+# EXAMPLE: examples/basic.pl
      
 =head1 DESCRIPTION
 
