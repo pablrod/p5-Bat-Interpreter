@@ -5,6 +5,7 @@ use utf8;
 use Moose;
 use App::BatParser;
 use Carp;
+use Data::Dumper;
 use Bat::Interpreter::Delegate::FileStore::LocalFileSystem;
 use Bat::Interpreter::Delegate::Executor::PartialDryRunner;
 use namespace::autoclean;
