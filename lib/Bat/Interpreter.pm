@@ -262,7 +262,11 @@ sub _handle_condition {
 
             #print "$left_operand == $right_operand\n";
             return $left_operand eq $right_operand;
-        } else {
+        } elsif ($operator eq 'GTR') {
+            return $left_operand > $right_operand;
+        }
+        
+        else {
             die "Operator: $operator not implemented";
         }
 
