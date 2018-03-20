@@ -30,16 +30,16 @@ Pure perl interpreter for a small subset of bat/cmd files.
 =cut
 
 has 'batfilestore' => (
-    is => 'rw',
-    does => 'Bat::Interpreter::Role::FileStore',
+    is      => 'rw',
+    does    => 'Bat::Interpreter::Role::FileStore',
     default => sub {
         Bat::Interpreter::Delegate::FileStore::LocalFileSystem->new;
     }
 );
 
 has 'executor' => (
-    is => 'rw',
-    does => 'Bat::Interpreter::Role::Executor',
+    is      => 'rw',
+    does    => 'Bat::Interpreter::Role::Executor',
     default => sub {
         Bat::Interpreter::Delegate::Executor::PartialDryRunner->new;
     }
@@ -52,20 +52,22 @@ Run the interpreter
 =cut
 
 sub run {
-    my $self   = shift();
+    my $self         = shift();
     my $filename     = shift();
     my $external_env = shift() // \%ENV;
+
     #$filename = $self->batfilestore->TraducirNombreArchivo($filename);
     #$filename = Path::Tiny::path($filename);
 
     my $parser = App::BatParser->new;
 
     my $ensure_last_line_has_carriage_return = "\r\n";
-    if ($^O eq 'MSWin32') {
+    if ( $^O eq 'MSWin32' ) {
         $ensure_last_line_has_carriage_return = "\n";
     }
 
-    my $parse_tree = $parser->parse( $self->batfilestore->get_contents($filename) . $ensure_last_line_has_carriage_return );
+    my $parse_tree =
+      $parser->parse( $self->batfilestore->get_contents($filename) . $ensure_last_line_has_carriage_return );
     if ($parse_tree) {
         my $lines = $parse_tree->{'File'}{'Lines'};
 
@@ -101,7 +103,7 @@ sub run {
 }
 
 sub _handle_instruction {
-    my $self   = shift();
+    my $self                = shift();
     my $current_instruction = shift();
     my $context             = shift();
 
@@ -125,7 +127,7 @@ sub _handle_instruction {
 }
 
 sub _handle_statement {
-    my $self   = shift();
+    my $self      = shift();
     my $statement = shift();
     my $context   = shift();
 
@@ -139,7 +141,7 @@ sub _handle_statement {
 }
 
 sub _handle_command {
-    my $self   = shift();
+    my $self    = shift();
     my $command = shift();
     my $context = shift();
 
@@ -169,20 +171,30 @@ sub _handle_command {
 }
 
 sub _handle_special_command {
-    my $self   = shift();
+    my $self                 = shift();
     my $special_command_line = shift();
     my $context              = shift();
 
     my ($type) = keys %$special_command_line;
 
     if ( $type eq 'If' ) {
-        my ( $condition, $statement ) = @{ $special_command_line->{'If'} }{ 'Condition', 'Statement' };
+        my $condition;
+        my $statement;
+        if ( exists $special_command_line->{$type}->{'NegatedCondition'} ) {
+            $condition = $special_command_line->{$type}->{'NegatedCondition'}->{'Condition'};
+            $statement = $special_command_line->{$type}->{'Statement'};
+            if ( not $self->_handle_condition( $condition, $context ) ) {
+                $self->_handle_statement( $statement, $context );
+            }
+        } else {
+            ( $condition, $statement ) = @{ $special_command_line->{'If'} }{ 'Condition', 'Statement' };
+            if ( $self->_handle_condition( $condition, $context ) ) {
 
-        if ( $self->_handle_condition( $condition, $context ) ) {
-
-            #print "True: " . Dumper($statement);
-            $self->_handle_statement( $statement, $context );
+                #print "True: " . Dumper($statement);
+                $self->_handle_statement( $statement, $context );
+            }
         }
+
     }
 
     if ( $type eq 'Goto' ) {
@@ -245,7 +257,7 @@ sub _handle_special_command {
 }
 
 sub _handle_condition {
-    my $self   = shift();
+    my $self      = shift();
     my $condition = shift();
     my $context   = shift();
 
@@ -271,7 +283,7 @@ sub _handle_condition {
 }
 
 sub _variable_substitution {
-    my $self   = shift();
+    my $self    = shift();
     my $string  = shift();
     my $context = shift();
 
@@ -324,21 +336,21 @@ sub _variable_substitution {
 }
 
 sub _adjust_path {
-    my $self   = shift();
+    my $self = shift();
     my $path = shift();
-    if (!($^O =~ 'Win')) {
+    if ( !( $^O =~ 'Win' ) ) {
         $path =~ s/\\/\//g;
     }
     return $path;
 }
 
 sub _execute_command {
-    my $self   = shift();
+    my $self = shift();
     $self->executor->execute_command(@_);
 }
 
 sub _goto_label {
-    my $self   = shift();
+    my $self    = shift();
     my $label   = shift();
     my $context = shift();
     $label =~ s/^://;
@@ -353,7 +365,7 @@ sub _goto_label {
 }
 
 sub _for_command_evaluation {
-    my $self   = shift();
+    my $self    = shift();
     my $comando = shift();
     return $self->executor->execute_for_command($comando);
 
