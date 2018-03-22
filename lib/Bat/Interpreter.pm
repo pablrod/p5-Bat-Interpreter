@@ -177,13 +177,23 @@ sub _handle_special_command {
     my ($type) = keys %$special_command_line;
 
     if ( $type eq 'If' ) {
-        my ( $condition, $statement ) = @{ $special_command_line->{'If'} }{ 'Condition', 'Statement' };
+        my $condition;
+        my $statement;
+        if ( exists $special_command_line->{$type}->{'NegatedCondition'} ) {
+            $condition = $special_command_line->{$type}->{'NegatedCondition'}->{'Condition'};
+            $statement = $special_command_line->{$type}->{'Statement'};
+            if ( not $self->_handle_condition( $condition, $context ) ) {
+                $self->_handle_statement( $statement, $context );
+            }
+        } else {
+            ( $condition, $statement ) = @{ $special_command_line->{'If'} }{ 'Condition', 'Statement' };
+            if ( $self->_handle_condition( $condition, $context ) ) {
 
-        if ( $self->_handle_condition( $condition, $context ) ) {
-
-            #print "True: " . Dumper($statement);
-            $self->_handle_statement( $statement, $context );
+                #print "True: " . Dumper($statement);
+                $self->_handle_statement( $statement, $context );
+            }
         }
+
     }
 
     if ( $type eq 'Goto' ) {
