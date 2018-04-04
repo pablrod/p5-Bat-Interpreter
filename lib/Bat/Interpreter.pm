@@ -319,6 +319,8 @@ sub _variable_substitution {
                 $manipulation =~ s/^://;
                 if ( $manipulation =~ /~(?<from>\d+),(?<length>\d+)/ ) {
                     $result = substr( $result, $+{'from'}, $+{'length'} );
+                } elsif ($manipulation =~ /\~(\-\d)+/) {
+                    $result = substr ($result, $1);
                 }
             }
             return $result;
