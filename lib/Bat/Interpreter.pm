@@ -269,12 +269,19 @@ sub _handle_condition {
         $left_operand  = $self->_variable_substitution( $left_operand,  $context );
         $right_operand = $self->_variable_substitution( $right_operand, $context );
 
-        if ( $operator eq '==' ) {
-
+        if ( $operator eq '==' || $operator eq 'EQU' ) {
             #print "$left_operand == $right_operand\n";
             return $left_operand eq $right_operand;
+        } elsif ($operator eq 'NEQ') {
+            return $left_operand != $right_operand;
+        } elsif ($operator eq 'LSS') {
+            return $left_operand < $right_operand;
+        } elsif ($operator eq 'LEQ') {
+            return $left_operand <= $right_operand;
         } elsif ($operator eq 'GTR') {
             return $left_operand > $right_operand;
+        } elsif ($operator eq 'GEQ') {
+            return $left_operand >= $right_operand;
         }
         
         else {
