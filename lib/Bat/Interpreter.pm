@@ -232,7 +232,7 @@ sub _handle_special_command {
         my $token = $special_command_line->{'For'}{'Token'};
 
         # Handle only simple cases
-        if ( $token =~ /\s*?\/F\s*?"delims="\s*%%(?<variable_bucle>[A-Z0-9]+?)\s*?in\s*?\('(?<comando>.+)'\)/ ) {
+        if ( $token =~ /\s*?\/F\s*?"delims="\s*%%(?<variable_bucle>[A-Z0-9]+?)\s*?in\s*?\('(?<comando>.+)'\)/i ) {
             my $comando        = $+{'comando'};
             my $parameter_name = $+{'variable_bucle'};
             $comando = $self->_variable_substitution( $comando, $context );
