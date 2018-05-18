@@ -206,16 +206,22 @@ sub _handle_special_command {
         if ( $token =~ /^:/ ) {
             $self->_goto_label( $token, $context );
         } else {
-
-            # Must be a file
-            #print "Calling file: $token\n";
-            my $stdout = $self->run( $token, $context->{ENV} );
-            if ( !defined $context->{STDOUT} ) {
-                $context->{STDOUT} = [];
-            }
-            if ( defined $stdout ) {
-                push @{ $context->{STDOUT} }, @$stdout;
-            }
+           (my $first_word) = $token =~ /\A([^:\s]+)/;
+           if ($first_word =~ /(\.[^.]+)$/) {
+               (my $extension) = $first_word =~ /(\.[^.]+)$/;
+               if ($extension eq '.exe') {
+                   $self->_execute_command( $token, $context );
+               } elsif ($extension eq '.bat' || $extension eq '.cmd') {
+                    #print "Calling file: $token\n";
+                    my $stdout = $self->run( $token, $context->{ENV} );
+                    if ( !defined $context->{STDOUT} ) {
+                        $context->{STDOUT} = [];
+                    }
+                    if ( defined $stdout ) {
+                        push @{ $context->{STDOUT} }, @$stdout;
+                    }
+               }
+           }
         }
     }
 
