@@ -1,3 +1,3 @@
 @echo off
 
-call 10-call_command_subcall.cmd
+call t/10-call_command_subcall.cmd
