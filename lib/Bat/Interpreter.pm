@@ -3,7 +3,7 @@ package Bat::Interpreter;
 use utf8;
 
 use Moose;
-use App::BatParser;
+use App::BatParser 0.005;
 use Carp;
 use Data::Dumper;
 use Bat::Interpreter::Delegate::FileStore::LocalFileSystem;
