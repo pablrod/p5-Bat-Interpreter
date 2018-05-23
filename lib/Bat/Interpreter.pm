@@ -3,7 +3,7 @@ package Bat::Interpreter;
 use utf8;
 
 use Moose;
-use App::BatParser;
+use App::BatParser 0.005;
 use Carp;
 use Data::Dumper;
 use Bat::Interpreter::Delegate::FileStore::LocalFileSystem;
@@ -255,6 +255,18 @@ sub _handle_special_command {
             #print Dumper($context->{'PARAMETERS'});
             $self->_handle_statement( $statement, $context );
             delete $context->{'PARAMETERS'}{$parameter_name};
+        } elsif ($token =~ /\s*?%%(?<variable_bucle>[A-Z0-9]+?)\s*?in\s*?(\([\d]+(?:,[^,\s]+)+\))/i) {
+            my $statement = $special_command_line->{'For'}{'Statement'};
+            my $parameter_name = $+{'variable_bucle'};
+            my $value_list = $2;
+            $value_list =~ s/(\(|\))//g;
+            my @values = split(/,/,$value_list);
+            for my $value (@values) {
+                $context->{'PARAMETERS'}->{$parameter_name} = $value;
+                $self->_handle_statement($statement, $context);
+                delete $context->{'PARAMETERS'}{$parameter_name};
+            } 
+            
         }
     }
 }

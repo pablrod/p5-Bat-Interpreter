@@ -1,5 +1,7 @@
-0.007 2018-05-23 04:00:00+0000
+0.008 2018-05-23 04:00:00+0000
   -Implement FOR loops through a list of values
+  -Fix prerequesites
+0.007 2018-05-21 20:00:00+0000
   -Support for call executables not just other bat and cmd files
 0.006 2018-05-15 20:00:00+0000
   -Support for case insensitive for commands
