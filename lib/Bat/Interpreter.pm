@@ -356,7 +356,7 @@ sub _variable_substitution {
     };
 
     #$string =~ s/(?<!%)(?:%([^:%]+?)(:.+?)?%)/$handle_variable_manipulations->($1, $2)/eg;
-    $string =~ s/%([\w\#\$\'\(\)\*\+\,\-\.\?\@\[\]\`\{\}\~]{2}[\w\s\#\$\'\(\)\*\+\,\-\.\?\@\[\]\`\{\}\~]*)(\:\~[\d\,]+)?%/$handle_variable_manipulations->($1, $2)/eg;
+    $string =~ s/%([\w\#\$\'\(\)\*\+\,\-\.\?\@\[\]\`\{\}\~]{2}[\w\s\#\$\'\(\)\*\+\,\-\.\?\@\[\]\`\{\}\~]*)(:.+?)?%/$handle_variable_manipulations->($1, $2)/eg;
 
     $string =~ s/%%/%/g;
 
