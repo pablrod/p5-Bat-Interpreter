@@ -337,27 +337,29 @@ sub _variable_substitution {
         my $variable_name = shift();
         my $manipulation  = shift();
 
-        my $result = $context->{'ENV'}{$1};
-        if ( defined $result ) {
-            if ( defined $manipulation && $manipulation ne '' ) {
-                $manipulation =~ s/^://;
-                if ( $manipulation =~ /~(?<from>\d+),(?<length>\d+)/ ) {
-                    $result = substr( $result, $+{'from'}, $+{'length'} );
-                } elsif ($manipulation =~ /\~(\-\d)+/) {
-                    $result = substr ($result, $1);
-                }
-            }
-            return $result;
-        } else {
-            print "Variable: $variable_name not defined\n";
+        if ( defined $variable_name && $variable_name ne '' ) {
 
-            #print "Environment known: " . Dumper($context->{'ENV'});
+            my $result = $context->{'ENV'}{$1};
+            if ( defined $result ) {
+                if ( defined $manipulation && $manipulation ne '' ) {
+                    $manipulation =~ s/^://;
+                    if ( $manipulation =~ /~(?<from>\d+),(?<length>\d+)/ ) {
+                        $result = substr( $result, $+{'from'}, $+{'length'} );
+                    } elsif ( $manipulation =~ /\~(\-\d)+/ ) {
+                        $result = substr( $result, $1 );
+                    }
+                }
+                return $result;
+            } else {
+                print "Variable: $variable_name not defined\n";
+            }
+            return '';
+        } else {
+            return '%%';
         }
-        return '';
     };
 
-    #$string =~ s/(?<!%)(?:%([^:%]+?)(:.+?)?%)/$handle_variable_manipulations->($1, $2)/eg;
-    $string =~ s/%([\w\#\$\'\(\)\*\+\,\-\.\?\@\[\]\`\{\}\~]{2}[\w\s\#\$\'\(\)\*\+\,\-\.\?\@\[\]\`\{\}\~]*)(:.+?)?%/$handle_variable_manipulations->($1, $2)/eg;
+    $string =~ s/%([\w\#\$\'\(\)\*\+\,\-\.\?\@\[\]\`\{\}\~]*?)(:.+?)?%/$handle_variable_manipulations->($1, $2)/eg;
 
     $string =~ s/%%/%/g;
 
@@ -397,14 +399,6 @@ sub _for_command_evaluation {
     my $self   = shift();
     my $comando = shift();
     return $self->executor->execute_for_command($comando);
-
-    if ( $comando =~ /^horalocal\.pl(.*)/ ) {
-        my $resultado_hora_local = HoraLocal($1);
-        return $resultado_hora_local;
-    } else {
-        my $salida = `$comando`;
-        chomp $salida;
-    }
 }
 
 1;
