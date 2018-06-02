@@ -2,7 +2,7 @@ package Bat::Interpreter::Role::FileStore;
 
 use utf8;
 
-use Moose::Role;
+use Moo::Role;
 use namespace::autoclean;
 
 # VERSION

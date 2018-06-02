@@ -2,7 +2,7 @@ package Bat::Interpreter::Delegate::Executor::System;
 
 use utf8;
 
-use Moose;
+use Moo;
 use namespace::autoclean;
 
 with 'Bat::Interpreter::Role::Executor';

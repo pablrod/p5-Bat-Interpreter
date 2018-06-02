@@ -2,7 +2,7 @@ package Bat::Interpreter::Delegate::FileStore::LocalFileSystem;
 
 use utf8;
 
-use Moose;
+use Moo;
 use Path::Tiny;
 use namespace::autoclean;
 

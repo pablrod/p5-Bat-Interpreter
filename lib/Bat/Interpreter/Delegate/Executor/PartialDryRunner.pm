@@ -2,7 +2,8 @@ package Bat::Interpreter::Delegate::Executor::PartialDryRunner;
 
 use utf8;
 
-use Moose;
+use Moo;
+use Types::Standard qw(ArrayRef);
 use namespace::autoclean;
 
 with 'Bat::Interpreter::Role::Executor';
@@ -41,13 +42,13 @@ some sort of conditional using ERRORLEVEL
 
 has 'commands_executed' => (
     is => 'ro',
-    isa => 'ArrayRef',
-    traits => ['Array'],
+    isa => ArrayRef,
     default => sub { [] },
-    handles => {
-        add_command => 'push'
-    }
 );
+
+sub add_command {
+    push @{ shift->commands_executed }, @_;
+}
 
 =head2 execute_command
 

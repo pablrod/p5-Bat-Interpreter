@@ -2,7 +2,8 @@ package Bat::Interpreter;
 
 use utf8;
 
-use Moose;
+use Moo;
+use Types::Standard qw(ConsumerOf);
 use App::BatParser 0.005;
 use Carp;
 use Data::Dumper;
@@ -30,7 +31,7 @@ Pure perl interpreter for a small subset of bat/cmd files.
 
 has 'batfilestore' => (
     is => 'rw',
-    does => 'Bat::Interpreter::Role::FileStore',
+    isa => ConsumerOf['Bat::Interpreter::Role::FileStore'],
     default => sub {
         Bat::Interpreter::Delegate::FileStore::LocalFileSystem->new;
     }
@@ -38,7 +39,7 @@ has 'batfilestore' => (
 
 has 'executor' => (
     is => 'rw',
-    does => 'Bat::Interpreter::Role::Executor',
+    isa => ConsumerOf['Bat::Interpreter::Role::Executor'],
     default => sub {
         Bat::Interpreter::Delegate::Executor::PartialDryRunner->new;
     }
@@ -405,8 +406,6 @@ sub _for_command_evaluation {
         chomp $salida;
     }
 }
-
-__PACKAGE__->meta->make_immutable();
 
 1;
 
