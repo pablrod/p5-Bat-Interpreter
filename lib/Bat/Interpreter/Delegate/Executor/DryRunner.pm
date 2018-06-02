@@ -40,6 +40,12 @@ some sort of conditional using ERRORLEVEL
 
 =cut
 
+=head2 commands_executed
+
+Returns an arrayref to the commands that are going to be executed but not part of a for command (aka: backticks executed in perl)
+
+=cut 
+
 has 'commands_executed' => (
     is => 'ro',
     isa => ArrayRef,
@@ -49,6 +55,12 @@ has 'commands_executed' => (
 sub add_command {
     push @{ shift->commands_executed }, @_;
 }
+
+=head2 for_commands_executed
+
+Returns an arrayref to the commands that are going to be executed as part of a for command (aka: bacticks executed in perl)
+
+=cut 
 
 has 'for_commands_executed' => (
     is => 'ro',

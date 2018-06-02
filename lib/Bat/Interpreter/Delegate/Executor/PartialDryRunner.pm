@@ -40,6 +40,12 @@ some sort of conditional using ERRORLEVEL
 
 =cut
 
+=head2 commands_executed
+
+Returns an arrayref to the commands that are going to be executed but not part of a for command (aka: backticks executed in perl)
+
+=cut 
+
 has 'commands_executed' => (
     is => 'ro',
     isa => ArrayRef,
