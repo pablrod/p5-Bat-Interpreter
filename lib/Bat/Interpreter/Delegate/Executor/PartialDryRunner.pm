@@ -52,6 +52,12 @@ has 'commands_executed' => (
     default => sub { [] },
 );
 
+=head2 add_command
+
+Add a command to the list of commands executed
+
+=cut
+
 sub add_command {
     push @{ shift->commands_executed }, @_;
 }

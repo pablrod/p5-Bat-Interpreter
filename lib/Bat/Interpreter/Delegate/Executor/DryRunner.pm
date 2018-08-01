@@ -52,6 +52,12 @@ has 'commands_executed' => (
     default => sub { [] },
 );
 
+=head2 add_command
+
+Add a command to the list of commands executed
+
+=cut
+
 sub add_command {
     push @{ shift->commands_executed }, @_;
 }
@@ -67,6 +73,12 @@ has 'for_commands_executed' => (
     isa => ArrayRef,
     default => sub { [] },
 );
+
+=head2 add_for_command
+
+Add a for command to the list of for commands executed
+
+=cut
 
 sub add_for_command {
     push @{ shift->for_commands_executed }, @_;
