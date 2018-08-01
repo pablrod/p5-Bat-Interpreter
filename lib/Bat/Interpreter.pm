@@ -286,13 +286,10 @@ sub _handle_condition {
         $left_operand  = $self->_variable_substitution( $left_operand,  $context );
         $right_operand = $self->_variable_substitution( $right_operand, $context );
 
-        if ( $operator eq '==' ) {
-            #print "$left_operand == $right_operand\n";
+        if ( $operator eq '==' || $operator eq 'EQU') {
             my $a = $left_operand =~ s/\s*(.*)\s*/$1/r;
             my $b = $right_operand =~ s/\s*(.*)\s*/$1/r;
             return $a eq $b;
-        } elsif ( $operator eq 'EQU') {
-            return $left_operand eq $right_operand;
         } elsif ($operator eq 'NEQ') {
             return $left_operand != $right_operand;
         } elsif ($operator eq 'LSS') {
