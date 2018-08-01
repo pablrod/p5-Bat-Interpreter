@@ -1,6 +1,7 @@
 @echo off
 
-If 130 GTR 14 goto label
+set FOO=    bar    
+If %FOO%==bar goto label
 
 rm file1
 
