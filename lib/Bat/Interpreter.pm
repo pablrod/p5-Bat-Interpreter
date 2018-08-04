@@ -4,7 +4,7 @@ use utf8;
 
 use Moo;
 use Types::Standard qw(ConsumerOf);
-use App::BatParser 0.005;
+use App::BatParser 0.011;
 use Carp;
 use Data::Dumper;
 use Bat::Interpreter::Delegate::FileStore::LocalFileSystem;
