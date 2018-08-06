@@ -2,6 +2,7 @@ package Bat::Interpreter;
 
 use utf8;
 
+use 5.014;
 use Moo;
 use Types::Standard qw(ConsumerOf);
 use App::BatParser 0.011;
