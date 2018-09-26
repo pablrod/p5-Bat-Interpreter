@@ -305,6 +305,8 @@ sub _handle_condition {
             die "Operator: $operator not implemented";
         }
 
+    }else{
+        die "Condition type $type not implemented";
     }
     return 0;
 }
