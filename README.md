@@ -4,14 +4,14 @@ Bat::Interpreter - Pure perl interpreter for a small subset of bat/cmd files
 
 # VERSION
 
-version 0.013
+version 0.014
 
 # SYNOPSIS
 
 ```perl
 #!/usr/bin/env perl -w
 
-use 5.0101;
+use 5.014;
 use Bat::Interpreter;
 
 my $interpreter = Bat::Interpreter->new;
@@ -53,6 +53,7 @@ The MIT (X11) License
 
 - eva.dominguez <eva.dominguez@meteologica.com>
 - Eva Dominguez <meloncego@gmail.com>
+- juanradiego <kilaweo@gmail.com>
 - pablo.rodriguez <pablo.rodriguez@meteologica.com>
 - ricardo.gomez <ricardogomezescalante@gmail.com>
 - Toby Inkster <tobyink@cpan.org>
