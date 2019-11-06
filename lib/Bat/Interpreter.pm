@@ -306,8 +306,11 @@ sub _handle_condition {
         else {
             die "Operator: $operator not implemented";
         }
-
-    }else{
+    } elsif ($type eq 'Exists') {
+        my $path = ${ $condition->{'Exists'} }{'Path'};
+        $path = $self->_adjust_path($path);
+        return -e $path;
+    } else{
         die "Condition type $type not implemented";
     }
     return 0;
