@@ -287,19 +287,20 @@ sub _handle_condition {
         $left_operand  = $self->_variable_substitution( $left_operand,  $context );
         $right_operand = $self->_variable_substitution( $right_operand, $context );
 
-        if ( $operator eq '==' || $operator eq 'EQU') {
+        my $uppercase_operator = uc($operator);
+        if ( $operator eq '==' || $uppercase_operator eq 'EQU') {
             my $a = $left_operand =~ s/\s*(.*)\s*/$1/r;
             my $b = $right_operand =~ s/\s*(.*)\s*/$1/r;
             return $a eq $b;
-        } elsif ($operator eq 'NEQ') {
+        } elsif ($uppercase_operator eq 'NEQ') {
             return $left_operand != $right_operand;
-        } elsif ($operator eq 'LSS') {
+        } elsif ($uppercase_operator eq 'LSS') {
             return $left_operand < $right_operand;
-        } elsif ($operator eq 'LEQ') {
+        } elsif ($uppercase_operator eq 'LEQ') {
             return $left_operand <= $right_operand;
-        } elsif ($operator eq 'GTR') {
+        } elsif ($uppercase_operator eq 'GTR') {
             return $left_operand > $right_operand;
-        } elsif ($operator eq 'GEQ') {
+        } elsif ($uppercase_operator eq 'GEQ') {
             return $left_operand >= $right_operand;
         }
         
