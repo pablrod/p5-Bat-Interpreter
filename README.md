@@ -4,7 +4,7 @@ Bat::Interpreter - Pure perl interpreter for a small subset of bat/cmd files
 
 # VERSION
 
-version 0.016
+version 0.017
 
 # SYNOPSIS
 
