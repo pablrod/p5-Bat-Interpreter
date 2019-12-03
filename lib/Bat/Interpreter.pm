@@ -351,12 +351,15 @@ sub _variable_substitution {
             if ( defined $result ) {
                 if ( defined $manipulation && $manipulation ne '' ) {
                     $manipulation =~ s/^://;
-                    if ( $manipulation =~ /~(?<from>\d+),(?<length>\d+)/ ) {
+                    if ( $manipulation =~ /^~(?<from>\d+),(?<length>\d+)$/ ) {
                         $result = substr( $result, $+{'from'}, $+{'length'} );
-                    } elsif ( $manipulation =~ /~-(?<from_end>\d+),(?<length>\d+)/ ) {
-                        $result = substr( $result, length($result) - $+{'from_end'}, $+{'length'} );
-                    } elsif ( $manipulation =~ /\~(\-\d)+/ ) {
+                    } elsif ( $manipulation =~ /^~(?<from_end>-\d+),(?<length>\d+)$/ ) {
+                        $result = substr( $result, $+{'from_end'}, $+{'length'} );
+                    } elsif ( $manipulation =~ /^\~(\-\d)+$/ ) {
                         $result = substr( $result, $1 );
+                    } else {
+                        Carp::cluck "Variable manipulation not understood: $manipulation over variable: $variable_name. Returning unchanged variable: $result";
+                        return $result;
                     }
                 }
                 return $result;
