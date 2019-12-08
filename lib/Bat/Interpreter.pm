@@ -10,6 +10,7 @@ use Carp;
 use Data::Dumper;
 use Bat::Interpreter::Delegate::FileStore::LocalFileSystem;
 use Bat::Interpreter::Delegate::Executor::PartialDryRunner;
+use Bat::Interpreter::Delegate::LineLogger::Silent;
 use namespace::autoclean;
 
 # VERSION
@@ -46,6 +47,14 @@ has 'executor' => (
     }
 );
 
+has 'linelogger' => (
+    is => 'rw',
+    isa => ConsumerOf['Bat::Interpreter::Role::LineLogger'],
+    default => sub {
+        Bat::Interpreter::Delegate::LineLogger::Silent->new;
+    }
+);
+
 =head2 run
 
 Run the interpreter
@@ -56,8 +65,6 @@ sub run {
     my $self   = shift();
     my $filename     = shift();
     my $external_env = shift() // \%ENV;
-    #$filename = $self->batfilestore->TraducirNombreArchivo($filename);
-    #$filename = Path::Tiny::path($filename);
 
     my $parser = App::BatParser->new;
 
@@ -93,7 +100,7 @@ sub run {
             $context->{'IP'} = $instruction_pointer;
             $self->_handle_instruction( $current_instruction, $context );
             $instruction_pointer = $context->{'IP'};
-
+            #$self->linelogger->log_line($lines->[$instruction_pointer]); 
         }
         return $context->{'STDOUT'};
     } else {
@@ -109,17 +116,16 @@ sub _handle_instruction {
     my ($type) = keys %$current_instruction;
 
     if ( $type eq 'Comment' ) {
-
-        #print "Comment \n";
+        #$self->linelogger->log_line($current_instruction->{'Comment'}{'Text'}); 
     }
 
     if ( $type eq 'Label' ) {
-
-        #print "Label \n";
+        #$self->linelogger->log_line($current_instruction->{'Label'}); 
     }
 
     if ( $type eq 'Statement' ) {
         my $statement = $current_instruction->{'Statement'};
+        #$self->linelogger->log_line($statement); 
         $self->_handle_statement( $statement, $context );
     }
 
@@ -154,8 +160,6 @@ sub _handle_command {
             # Path adjustment
             $command_line = $self->_adjust_path($command_line);
 
-            # Dispatch all commands throug supervisor
-            # $command_line = "supervisor.pl " . $command_line;
             $self->_execute_command( $command_line, $context );
         }
         if ( $type eq 'SpecialCommand' ) {
@@ -163,8 +167,7 @@ sub _handle_command {
             $self->_handle_special_command( $special_command_line, $context );
         }
     } else {
-
-        #print "Empty command\n";
+        # Empty command 
     }
 
 }
@@ -188,8 +191,6 @@ sub _handle_special_command {
         } else {
             ( $condition, $statement ) = @{ $special_command_line->{'If'} }{ 'Condition', 'Statement' };
             if ( $self->_handle_condition( $condition, $context ) ) {
-
-                #print "True: " . Dumper($statement);
                 $self->_handle_statement( $statement, $context );
             }
         }
@@ -214,7 +215,6 @@ sub _handle_special_command {
                if ($extension eq '.exe') {
                    $self->_execute_command( $token, $context );
                } elsif ($extension eq '.bat' || $extension eq '.cmd') {
-                    #print "Calling file: $token\n";
                     my $stdout = $self->run( $token, $context->{ENV} );
                     if ( !defined $context->{STDOUT} ) {
                         $context->{STDOUT} = [];
@@ -245,16 +245,12 @@ sub _handle_special_command {
             $comando = $self->_adjust_path($comando);
             $comando =~ s/%%/%/g;
 
-            #print "Comando $comando\n";
             my $salida = $self->_for_command_evaluation($comando);
 
-            #print "Salida $salida";
             my $statement = $special_command_line->{'For'}{'Statement'};
 
-            # Inyectar el término de
             $context->{'PARAMETERS'}{$parameter_name} = $salida;
 
-            #print Dumper($context->{'PARAMETERS'});
             $self->_handle_statement( $statement, $context );
             delete $context->{'PARAMETERS'}{$parameter_name};
         } elsif ($token =~ /\s*?%%(?<variable_bucle>[A-Z0-9]+?)\s*?in\s*?(\([\d]+(?:,[^,\s]+)+\))/i) {
@@ -269,6 +265,8 @@ sub _handle_special_command {
                 delete $context->{'PARAMETERS'}{$parameter_name};
             } 
             
+        } else {
+            Carp::confess('FOR functionality not implemented!');
         }
     }
 }
@@ -283,7 +281,6 @@ sub _handle_condition {
         my ( $left_operand, $operator, $right_operand ) =
           @{ $condition->{'Comparison'} }{qw(LeftOperand Operator RightOperand)};
 
-        # Variable sustitution
         $left_operand  = $self->_variable_substitution( $left_operand,  $context );
         $right_operand = $self->_variable_substitution( $right_operand, $context );
 
@@ -364,7 +361,7 @@ sub _variable_substitution {
                 }
                 return $result;
             } else {
-                print "Variable: $variable_name not defined\n";
+                Carp::cluck("Variable: $variable_name not defined");
             }
             return '';
         } else {
@@ -401,8 +398,6 @@ sub _goto_label {
     $label =~ s/ //g;
     if ( $context->{'LABEL_INDEX'}{$label} ) {
         $context->{'IP'} = $context->{'LABEL_INDEX'}{$label};
-
-        #print "Goto: " . $context->{'IP'} . " via $label\n";
     } else {
         die "Label: $label not indexed. Index contains: " . Dumper( $context->{'LABEL_INDEX'} );
     }
