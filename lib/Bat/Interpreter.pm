@@ -104,8 +104,7 @@ sub run {
             if ($old_ip == $instruction_pointer) {
                 $instruction_pointer++;
             }
-            $self->linelogger->log_line($context->{'current_line'}); 
-            $context->{'current_line'} = '';
+            $self->_log_line_from_context($context);
         }
         return $context->{'STDOUT'};
     } else {
@@ -226,6 +225,7 @@ sub _handle_special_command {
                if ($extension eq '.exe') {
                    $self->_execute_command( $token, $context );
                } elsif ($extension eq '.bat' || $extension eq '.cmd') {
+                    $self->_log_line_from_context($context);
                     my $stdout = $self->run( $token, $context->{ENV} );
                     if ( !defined $context->{STDOUT} ) {
                         $context->{STDOUT} = [];
@@ -259,7 +259,7 @@ sub _handle_special_command {
             $comando =~ s/%%/%/g;
 
 
-            $context->{'current_line'} .= '***** SORRY, NOT IMPLEMENTED YET!**** ';
+            $context->{'current_line'} .= '/F "delims="' . $parameter_name . ' in ' . "'$comando' ";
             my $salida = $self->_for_command_evaluation($comando);
 
             my $statement = $special_command_line->{'For'}{'Statement'};
@@ -274,9 +274,10 @@ sub _handle_special_command {
             my $value_list = $2;
             $value_list =~ s/(\(|\))//g;
             my @values = split(/,/,$value_list);
-            $context->{'current_line'} .= '***** SORRY, NOT IMPLEMENTED YET!**** ';
+            $context->{'current_line'} .= $token . ' do ';
             for my $value (@values) {
                 $context->{'PARAMETERS'}->{$parameter_name} = $value;
+                $context->{'current_line'} .= "\n\t";
                 $self->_handle_statement($statement, $context);
                 delete $context->{'PARAMETERS'}{$parameter_name};
             } 
@@ -292,7 +293,9 @@ sub _handle_special_command {
         if (exists $echo->{'EchoModifier'}) {
             $context->{'current_line'} .= $echo->{'EchoModifier'};
         } else {
-            $context->{'current_line'} .= $echo->{'Message'};
+            my $message = $echo->{'Message'};
+            $message = $self->_variable_substitution( $message, $context );
+            $context->{'current_line'} .= $message;
         }
     }
 }
@@ -436,6 +439,16 @@ sub _for_command_evaluation {
     my $self   = shift();
     my $comando = shift();
     return $self->executor->execute_for_command($comando);
+}
+
+sub _log_line_from_context {
+    my $self = shift();
+    my $context = shift();
+    my $line = $context->{'current_line'};
+    if (defined $line && $line ne '') {
+        $self->linelogger->log_line($context->{'current_line'}); 
+    }
+    $context->{'current_line'} = '';
 }
 
 1;
