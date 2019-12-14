@@ -23,7 +23,7 @@ Bat::Interpreter::Delegate::LineLogger::Silent - LineLogger that just don't log 
 
     my $silent_line_logger = Bat::Interpreter::Delegate::LineLogger::Silent->new;
 
-    my $interpreter = Bat::Interpreter->new(line_logger => $silent_line_logger);
+    my $interpreter = Bat::Interpreter->new(linelogger => $silent_line_logger);
     $interpreter->run('my.cmd');
      
 =head1 DESCRIPTION
@@ -40,8 +40,6 @@ This line logger just discards every line so nothing get logged or printed on ST
 
 sub log_line {
     my $self = shift();
-    #use Data::Dumper;
-    #print Dumper(@_);
     return 0;
 }
 

@@ -92,15 +92,20 @@ sub run {
         }
         $line_from_label{'EOF'} = scalar @$lines;
         $line_from_label{'eof'} = scalar @$lines;
-        my $context = { 'ENV' => \%environment, 'IP' => 0, 'LABEL_INDEX' => \%line_from_label };
+        my $context = { 'ENV' => \%environment, 'IP' => 0, 'LABEL_INDEX' => \%line_from_label, 'current_line' => '' };
 
         # Execute lines in a nonlinear fashion
-        for ( my $instruction_pointer = 0; $instruction_pointer < scalar @$lines; $instruction_pointer++ ) {
+        for ( my $instruction_pointer = 0; $instruction_pointer < scalar @$lines;) {
             my $current_instruction = $lines->[$instruction_pointer];
             $context->{'IP'} = $instruction_pointer;
+            my $old_ip = $instruction_pointer;
             $self->_handle_instruction( $current_instruction, $context );
             $instruction_pointer = $context->{'IP'};
-            #$self->linelogger->log_line($lines->[$instruction_pointer]); 
+            if ($old_ip == $instruction_pointer) {
+                $instruction_pointer++;
+            }
+            $self->linelogger->log_line($context->{'current_line'}); 
+            $context->{'current_line'} = '';
         }
         return $context->{'STDOUT'};
     } else {
@@ -116,16 +121,15 @@ sub _handle_instruction {
     my ($type) = keys %$current_instruction;
 
     if ( $type eq 'Comment' ) {
-        #$self->linelogger->log_line($current_instruction->{'Comment'}{'Text'}); 
+        $context->{'current_line'} = ":: " . $current_instruction->{'Comment'}{'Text'}; 
     }
 
     if ( $type eq 'Label' ) {
-        #$self->linelogger->log_line($current_instruction->{'Label'}); 
+        $context->{'current_line'} = ":" . $current_instruction->{'Label'}{'Identifier'};
     }
 
     if ( $type eq 'Statement' ) {
         my $statement = $current_instruction->{'Statement'};
-        #$self->linelogger->log_line($statement); 
         $self->_handle_statement( $statement, $context );
     }
 
@@ -160,6 +164,8 @@ sub _handle_command {
             # Path adjustment
             $command_line = $self->_adjust_path($command_line);
 
+            $context->{'current_line'} .= $command_line;
+
             $self->_execute_command( $command_line, $context );
         }
         if ( $type eq 'SpecialCommand' ) {
@@ -168,6 +174,7 @@ sub _handle_command {
         }
     } else {
         # Empty command 
+        $context->{'current_line'} .= '';
     }
 
 }
@@ -180,9 +187,11 @@ sub _handle_special_command {
     my ($type) = keys %$special_command_line;
 
     if ( $type eq 'If' ) {
+        $context->{'current_line'} .= 'IF ';
         my $condition;
         my $statement;
         if ( exists $special_command_line->{$type}->{'NegatedCondition'} ) {
+            $context->{'current_line'} .= 'NOT ';
             $condition = $special_command_line->{$type}->{'NegatedCondition'}->{'Condition'};
             $statement = $special_command_line->{$type}->{'Statement'};
             if ( not $self->_handle_condition( $condition, $context ) ) {
@@ -199,6 +208,7 @@ sub _handle_special_command {
 
     if ( $type eq 'Goto' ) {
         my $label = $special_command_line->{'Goto'}{'Identifier'};
+        $context->{'current_line'} .= 'GOTO ' . $label;
         $self->_goto_label( $label, $context );
     }
 
@@ -206,6 +216,7 @@ sub _handle_special_command {
         my $token = $special_command_line->{'Call'}{'Token'};
         $token = $self->_variable_substitution( $token, $context );
         $token = $self->_adjust_path($token);
+        $context->{'current_line'} .= 'CALL ' . $token;
         if ( $token =~ /^:/ ) {
             $self->_goto_label( $token, $context );
         } else {
@@ -231,10 +242,12 @@ sub _handle_special_command {
         my ( $variable, $value ) = @{ $special_command_line->{'Set'} }{ 'Variable', 'Value' };
         $value                     = $self->_variable_substitution( $value, $context );
         $value                     = $self->_adjust_path($value);
+        $context->{'current_line'} .= 'SET ' . $variable . '=' . $value;
         $context->{ENV}{$variable} = $value;
     }
 
     if ( $type eq 'For' ) {
+        $context->{'current_line'} .= 'FOR ';
         my $token = $special_command_line->{'For'}{'Token'};
 
         # Handle only simple cases
@@ -245,6 +258,8 @@ sub _handle_special_command {
             $comando = $self->_adjust_path($comando);
             $comando =~ s/%%/%/g;
 
+
+            $context->{'current_line'} .= '***** SORRY, NOT IMPLEMENTED YET!**** ';
             my $salida = $self->_for_command_evaluation($comando);
 
             my $statement = $special_command_line->{'For'}{'Statement'};
@@ -259,6 +274,7 @@ sub _handle_special_command {
             my $value_list = $2;
             $value_list =~ s/(\(|\))//g;
             my @values = split(/,/,$value_list);
+            $context->{'current_line'} .= '***** SORRY, NOT IMPLEMENTED YET!**** ';
             for my $value (@values) {
                 $context->{'PARAMETERS'}->{$parameter_name} = $value;
                 $self->_handle_statement($statement, $context);
@@ -267,6 +283,16 @@ sub _handle_special_command {
             
         } else {
             Carp::confess('FOR functionality not implemented!');
+        }
+    }
+
+    if ( $type eq 'Echo' ) {
+        $context->{'current_line'} .= 'ECHO ';
+        my $echo = $special_command_line->{'Echo'};
+        if (exists $echo->{'EchoModifier'}) {
+            $context->{'current_line'} .= $echo->{'EchoModifier'};
+        } else {
+            $context->{'current_line'} .= $echo->{'Message'};
         }
     }
 }
@@ -283,6 +309,8 @@ sub _handle_condition {
 
         $left_operand  = $self->_variable_substitution( $left_operand,  $context );
         $right_operand = $self->_variable_substitution( $right_operand, $context );
+ 
+        $context->{'current_line'} .= $left_operand . ' ' . $operator . ' ' . $right_operand . ' ';
 
         my $uppercase_operator = uc($operator);
         if ( $operator eq '==' || $uppercase_operator eq 'EQU') {
@@ -307,6 +335,7 @@ sub _handle_condition {
     } elsif ($type eq 'Exists') {
         my $path = ${ $condition->{'Exists'} }{'Path'};
         $path = $self->_adjust_path($path);
+        $context->{'current_line'} .= 'EXIST ' . $path;
         return -e $path;
     } else{
         die "Condition type $type not implemented";
