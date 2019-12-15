@@ -25,6 +25,8 @@ say join("\n", @{$interpreter->executor->commands_executed});
 
 Pure perl interpreter for a small subset of bat/cmd files.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/xi8e6fjjxwfp77th/branch/master?svg=true)](https://ci.appveyor.com/project/pablrod/p5-bat-interpreter/branch/master)
+
 # METHODS
 
 ## run
