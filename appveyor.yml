@@ -1,3 +1,5 @@
+version: "{build} ~ {branch}"
+
 environment:
   PERL_CPANM_OPT: "--notest --force --skip-satisfied"
 
