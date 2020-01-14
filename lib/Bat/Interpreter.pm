@@ -99,7 +99,11 @@ sub run {
         }
         $line_from_label{'EOF'} = scalar @$lines;
         $line_from_label{'eof'} = scalar @$lines;
-        my $context = { 'ENV' => \%environment, 'IP' => 0, 'LABEL_INDEX' => \%line_from_label, 'current_line' => '' };
+        my $context = { 'ENV' => \%environment, 
+                        'IP' => 0, 
+                        'LABEL_INDEX' => \%line_from_label, 
+                        'current_line' => '',
+                        'STACK' => [] };
 
         # Execute lines in a nonlinear fashion
         for ( my $instruction_pointer = 0; $instruction_pointer < scalar @$lines;) {
@@ -172,7 +176,14 @@ sub _handle_command {
 
             $context->{'current_line'} .= $command_line;
 
-            $self->_execute_command( $command_line, $context );
+            if ($command_line =~ /^exit\s+\/b/i) {
+                my $stack_frame = pop @{$context->{'STACK'}};
+                if (defined $stack_frame) {
+                    $context->{'IP'} = $stack_frame->{'IP'} + 1;
+                }
+            } else {   
+                $self->_execute_command( $command_line, $context );
+            }
         }
         if ( $type eq 'SpecialCommand' ) {
             my $special_command_line = $command->{'SpecialCommand'};
@@ -436,7 +447,17 @@ sub _goto_label {
     $label =~ s/^://;
     $label =~ s/ //g;
     if ( $context->{'LABEL_INDEX'}{$label} ) {
-        $context->{'IP'} = $context->{'LABEL_INDEX'}{$label};
+        if ($label =~ /eof/i) {
+            my $stack_frame = pop @{$context->{'STACK'}};
+            if (defined $stack_frame) {
+                $context->{'IP'} = $stack_frame->{'IP'} + 1;
+            } else {
+                $context->{'IP'} = $context->{'LABEL_INDEX'}{$label};
+            }
+        } else {
+            push @{$context->{'STACK'}}, {IP => $context->{'IP'}};
+            $context->{'IP'} = $context->{'LABEL_INDEX'}{$label};
+        }
     } else {
         die "Label: $label not indexed. Index contains: " . Dumper( $context->{'LABEL_INDEX'} );
     }
