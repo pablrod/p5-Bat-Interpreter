@@ -226,7 +226,7 @@ sub _handle_special_command {
     if ( $type eq 'Goto' ) {
         my $label = $special_command_line->{'Goto'}{'Identifier'};
         $context->{'current_line'} .= 'GOTO ' . $label;
-        $self->_goto_label( $label, $context );
+        $self->_goto_label( $label, $context, 0);
     }
 
     if ( $type eq 'Call' ) {
@@ -235,7 +235,7 @@ sub _handle_special_command {
         $token = $self->_adjust_path($token);
         $context->{'current_line'} .= 'CALL ' . $token;
         if ( $token =~ /^:/ ) {
-            $self->_goto_label( $token, $context );
+            $self->_goto_label( $token, $context , 1);
         } else {
            (my $first_word) = $token =~ /\A([^:\s]+)/;
            if ($first_word =~ /(\.[^.]+)$/) {
@@ -444,6 +444,7 @@ sub _goto_label {
     my $self   = shift();
     my $label   = shift();
     my $context = shift();
+    my $call    = shift();
     $label =~ s/^://;
     $label =~ s/ //g;
     if ( $context->{'LABEL_INDEX'}{$label} ) {
@@ -455,7 +456,9 @@ sub _goto_label {
                 $context->{'IP'} = $context->{'LABEL_INDEX'}{$label};
             }
         } else {
-            push @{$context->{'STACK'}}, {IP => $context->{'IP'}};
+            if ($call) {
+                push @{$context->{'STACK'}}, {IP => $context->{'IP'}};
+            }
             $context->{'IP'} = $context->{'LABEL_INDEX'}{$label};
         }
     } else {
