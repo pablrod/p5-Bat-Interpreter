@@ -237,12 +237,12 @@ sub _handle_special_command {
         if ( $token =~ /^:/ ) {
             $self->_goto_label( $token, $context , 1);
         } else {
-           (my $first_word) = $token =~ /\A([^:\s]+)/;
-           if ($first_word =~ /(\.[^.]+)$/) {
-               (my $extension) = $first_word =~ /(\.[^.]+)$/;
-               if ($extension eq '.exe') {
-                   $self->_execute_command( $token, $context );
-               } elsif ($extension eq '.bat' || $extension eq '.cmd') {
+            ( my $first_word ) = $token =~ /\A([^\s]+)/;
+            if ( $first_word =~ /(\.[^.]+)$/ ) {
+                ( my $extension ) = $first_word =~ /(\.[^.]+)$/;
+                if ( $extension eq '.exe' ) {
+                    $self->_execute_command( $token, $context );
+                } elsif ( $extension eq '.bat' || $extension eq '.cmd' ) {
                     $self->_log_line_from_context($context);
                     my $stdout = $self->run( $token, $context->{ENV} );
                     if ( !defined $context->{STDOUT} ) {
