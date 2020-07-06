@@ -4,7 +4,7 @@ Bat::Interpreter - Pure perl interpreter for a small subset of bat/cmd files
 
 # VERSION
 
-version 0.022
+version 0.023
 
 # SYNOPSIS
 
@@ -54,7 +54,7 @@ The MIT (X11) License
 # CONTRIBUTORS
 
 - eva.dominguez <eva.dominguez@meteologica.com>
-- Eva Dominguez <meloncego@gmail.com>
+- Eva <meloncego@gmail.com>
 - juanradiego <kilaweo@gmail.com>
 - Nicolas De los Santos <ndls05@gmail.com>
 - pablo.rodriguez <pablo.rodriguez@meteologica.com>
