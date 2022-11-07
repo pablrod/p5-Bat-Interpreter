@@ -106,7 +106,8 @@ sub run {
             'IP'           => 0,
             'LABEL_INDEX'  => \%line_from_label,
             'current_line' => '',
-            'STACK'        => []
+            'STACK'        => [],
+            'filename'     => $filename
         };
 
         # Execute lines in a nonlinear fashion
